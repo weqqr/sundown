@@ -1,0 +1,14 @@
+[package]
+name = "kintsugi"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+egui = { git = "https://github.com/emilk/egui", rev = "898f4804"}
+egui-winit = { git = "https://github.com/emilk/egui", rev = "898f4804"}
+egui-wgpu = { git = "https://github.com/emilk/egui", rev = "898f4804"}
+
+winit = "0.26"
+wgpu = "0.13"
