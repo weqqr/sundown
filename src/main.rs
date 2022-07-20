@@ -1,23 +1,34 @@
+pub mod renderer;
+
+use crate::renderer::Renderer;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::{Window, WindowBuilder};
+use winit::window::WindowBuilder;
 
 pub struct App {
-    window: Window,
+    renderer: Renderer,
 }
 
 impl App {
     pub fn new(event_loop: &EventLoop<()>) -> Self {
         let window = WindowBuilder::new().build(event_loop).unwrap();
+        let renderer = Renderer::new(window);
 
-        Self { window }
+        Self { renderer }
     }
 
     pub fn handle_event(&mut self, event: &WindowEvent) -> Option<ControlFlow> {
         match event {
-            WindowEvent::CloseRequested => Some(ControlFlow::Exit),
-            _ => None,
+            WindowEvent::CloseRequested => return Some(ControlFlow::Exit),
+            WindowEvent::Resized(size) => self.renderer.resize(*size),
+            _ => {}
         }
+
+        None
+    }
+
+    pub fn render(&mut self) {
+        self.renderer.render();
     }
 }
 
@@ -39,7 +50,7 @@ fn main() {
                 // update
             }
             Event::RedrawRequested(_) => {
-                // redraw
+                app.render();
             }
             _ => (),
         }
