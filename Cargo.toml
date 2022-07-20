@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1"
+
 egui = { git = "https://github.com/emilk/egui", rev = "898f4804"}
 egui-winit = { git = "https://github.com/emilk/egui", rev = "898f4804"}
 egui-wgpu = { git = "https://github.com/emilk/egui", rev = "898f4804"}
@@ -14,3 +16,9 @@ pollster = "0.2"
 
 winit = "0.26"
 wgpu = "0.13"
+
+[target.'cfg(windows)'.dependencies]
+rusqlite = { version = "0.28", features = ["bundled"] }
+
+[target.'cfg(not(windows))'.dependencies]
+rusqlite = "0.28"

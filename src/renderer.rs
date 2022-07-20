@@ -3,6 +3,7 @@ use wgpu::*;
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
+#[allow(dead_code)]
 pub struct Renderer {
     window: Window,
 
@@ -91,7 +92,6 @@ impl Renderer {
                 })],
                 depth_stencil_attachment: None,
             });
-
         }
 
         self.queue.submit([encoder.finish()]);
