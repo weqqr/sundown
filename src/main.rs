@@ -13,7 +13,8 @@ pub struct App {
 
 impl App {
     pub fn new(event_loop: &EventLoop<()>) -> Self {
-        let world = World::open(std::env::args().nth(1).unwrap()).unwrap();
+        let mut world = World::open(std::env::args().nth(1).unwrap()).unwrap();
+        let block = world.get_block(Pos3::new(0, 0, 0));
         let window = WindowBuilder::new().build(event_loop).unwrap();
         let renderer = Renderer::new(window);
 

@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use rusqlite::OptionalExtension;
 use std::path::Path;
 
@@ -12,6 +12,14 @@ pub struct Pos3 {
 impl Pos3 {
     pub fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
+    }
+}
+
+pub struct Block {}
+
+impl Block {
+    pub fn deserialize(data: &[u8]) -> Result<Self> {
+        todo!()
     }
 }
 
@@ -102,6 +110,31 @@ impl World {
 
         println!("{}", meta.backend);
 
-        todo!()
+        let backend = match meta.backend.as_str() {
+            "sqlite3" => {
+                let path = path.as_ref().join("map.sqlite");
+                Box::new(SqliteBackend::new(path)?)
+            }
+            _ => bail!("unknown world backend: {}", meta.backend),
+        };
+
+        Ok(Self { backend })
+    }
+
+    pub fn get_block(&mut self, pos: Pos3) -> Result<Option<Block>> {
+        let data = self
+            .backend
+            .get_block_data(pos)
+            .context("unable to retrieve block data")?;
+
+        // Return None when backend returns no data
+        let data = match data {
+            Some(data) => data,
+            None => return Ok(None),
+        };
+
+        let block = Block::deserialize(&data)?;
+
+        Ok(Some(block))
     }
 }
