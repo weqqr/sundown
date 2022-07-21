@@ -1,11 +1,12 @@
 pub mod renderer;
+pub mod serialization;
 pub mod world;
 
 use crate::renderer::Renderer;
+use crate::world::{BlockPos3, World};
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
-use crate::world::{SqliteBackend, Backend, Pos3, World};
 
 pub struct App {
     renderer: Renderer,
@@ -14,7 +15,7 @@ pub struct App {
 impl App {
     pub fn new(event_loop: &EventLoop<()>) -> Self {
         let mut world = World::open(std::env::args().nth(1).unwrap()).unwrap();
-        let block = world.get_block(Pos3::new(0, 0, 0));
+        let block = world.get_block(BlockPos3::new(0, 0, 0));
         let window = WindowBuilder::new().build(event_loop).unwrap();
         let renderer = Renderer::new(window);
 

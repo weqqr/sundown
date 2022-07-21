@@ -1,31 +1,79 @@
-use anyhow::{bail, Context, Result};
+use crate::serialization::Serialize;
+use anyhow::{bail, ensure, Context, Result};
 use rusqlite::OptionalExtension;
+use std::io::Cursor;
 use std::path::Path;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Pos3 {
-    pub x: i32,
-    pub y: i32,
-    pub z: i32,
+pub struct BlockPos3 {
+    pub x: i64,
+    pub y: i64,
+    pub z: i64,
 }
 
-impl Pos3 {
-    pub fn new(x: i32, y: i32, z: i32) -> Self {
+impl BlockPos3 {
+    pub fn new(x: i64, y: i64, z: i64) -> Self {
         Self { x, y, z }
+    }
+
+    fn to_index(self) -> i64 {
+        self.z * 0x1000000 + self.y * 0x1000 + self.x
     }
 }
 
-pub struct Block {}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct NodePos3 {
+    pub x: usize,
+    pub y: usize,
+    pub z: usize,
+}
+
+impl NodePos3 {
+    pub fn new(x: usize, y: usize, z: usize) -> Self {
+        Self { x, y, z }
+    }
+
+    fn to_index(self) -> usize {
+        assert!(self.x < Block::SIZE && self.y < Block::SIZE && self.z < Block::SIZE);
+
+        self.z as usize * Block::SIZE * Block::SIZE
+            + self.y as usize * Block::SIZE
+            + self.x as usize
+    }
+}
+
+pub struct Node {
+    pub id: u16,
+    pub param1: u8,
+    pub param2: u8,
+}
+
+pub struct Block {
+    node_data: Vec<u8>,
+}
 
 impl Block {
+    pub const SIZE: usize = 16;
+
     pub fn deserialize(data: &[u8]) -> Result<Self> {
-        todo!()
+        let mut c = Cursor::new(data);
+        let version = u8::deserialize(&mut c)?;
+
+        ensure!(version == 28);
+
+        todo!();
+    }
+
+    pub fn get_node(&self, pos: NodePos3) -> Node {
+        let index = pos.to_index();
+
+        todo!();
     }
 }
 
 pub trait Backend {
-    fn get_block_data(&mut self, pos: Pos3) -> Result<Option<Vec<u8>>>;
-    fn set_block_data(&mut self, pos: Pos3, data: &[u8]) -> Result<()>;
+    fn get_block_data(&mut self, pos: BlockPos3) -> Result<Option<Vec<u8>>>;
+    fn set_block_data(&mut self, pos: BlockPos3, data: &[u8]) -> Result<()>;
 }
 
 pub struct SqliteBackend {
@@ -43,13 +91,9 @@ impl SqliteBackend {
     }
 }
 
-fn pos_to_index(pos: Pos3) -> i64 {
-    pos.z as i64 * 0x1000000 + pos.y as i64 * 0x1000 + pos.x as i64
-}
-
 impl Backend for SqliteBackend {
-    fn get_block_data(&mut self, pos: Pos3) -> Result<Option<Vec<u8>>> {
-        let index = pos_to_index(pos);
+    fn get_block_data(&mut self, pos: BlockPos3) -> Result<Option<Vec<u8>>> {
+        let index = pos.to_index();
         let mut stmt = self
             .conn
             .prepare_cached("SELECT data FROM blocks WHERE pos = ?")
@@ -58,7 +102,7 @@ impl Backend for SqliteBackend {
         Ok(stmt.query_row([index], |row| row.get(0)).optional()?)
     }
 
-    fn set_block_data(&mut self, pos: Pos3, data: &[u8]) -> Result<()> {
+    fn set_block_data(&mut self, pos: BlockPos3, data: &[u8]) -> Result<()> {
         todo!()
     }
 }
@@ -121,7 +165,7 @@ impl World {
         Ok(Self { backend })
     }
 
-    pub fn get_block(&mut self, pos: Pos3) -> Result<Option<Block>> {
+    pub fn get_block(&mut self, pos: BlockPos3) -> Result<Option<Block>> {
         let data = self
             .backend
             .get_block_data(pos)
