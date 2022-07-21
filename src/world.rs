@@ -55,12 +55,53 @@ impl Backend for SqliteBackend {
     }
 }
 
+pub struct WorldMeta {
+    backend: String,
+    game: String,
+}
+
+impl WorldMeta {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let data = std::fs::read_to_string(path).context("unable to read world meta file")?;
+
+        let mut backend = None;
+        let mut game = None;
+
+        for line in data.lines().map(|line| line.trim()) {
+            if line.starts_with('#') {
+                continue;
+            }
+
+            let (key, value) = line
+                .split_once('=')
+                .map(|(k, v)| (k.trim(), v.trim()))
+                .context("invalid line")?;
+
+            match key {
+                "backend" => backend = Some(value.to_string()),
+                "gameid" => game = Some(value.to_string()),
+                _ => continue,
+            }
+        }
+
+        Ok(Self {
+            backend: backend.context("world.mt doesn't specify backend")?,
+            game: game.context("world.mt doesn't specify game")?,
+        })
+    }
+}
+
 pub struct World {
     backend: Box<dyn Backend>,
 }
 
 impl World {
-    pub fn open<P: AsRef<Path>>(p: P) -> Result<Self> {
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let meta = WorldMeta::from_file(path.as_ref().join("world.mt"))
+            .context("unable to extract meta from world")?;
+
+        println!("{}", meta.backend);
+
         todo!()
     }
 }

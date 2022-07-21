@@ -5,7 +5,7 @@ use crate::renderer::Renderer;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
-use crate::world::{SqliteBackend, Backend, Pos3};
+use crate::world::{SqliteBackend, Backend, Pos3, World};
 
 pub struct App {
     renderer: Renderer,
@@ -13,8 +13,7 @@ pub struct App {
 
 impl App {
     pub fn new(event_loop: &EventLoop<()>) -> Self {
-        let mut backend = SqliteBackend::new(std::env::args().nth(1).unwrap()).unwrap();
-        println!("{:?}", backend.get_block_data(Pos3::new(0, 0, 0)).unwrap());
+        let world = World::open(std::env::args().nth(1).unwrap()).unwrap();
         let window = WindowBuilder::new().build(event_loop).unwrap();
         let renderer = Renderer::new(window);
 
