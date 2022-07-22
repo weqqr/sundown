@@ -1,0 +1,17 @@
+[package]
+name = "kintsugi_world"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kintsugi_core = { path = "../kintsugi_core" }
+
+anyhow = "1"
+
+[target.'cfg(windows)'.dependencies]
+rusqlite = { version = "0.28", features = ["bundled"] }
+
+[target.'cfg(not(windows))'.dependencies]
+rusqlite = "0.28"

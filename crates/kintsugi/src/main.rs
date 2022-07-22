@@ -1,9 +1,8 @@
 pub mod renderer;
-pub mod serialization;
 pub mod world;
 
 use crate::renderer::Renderer;
-use crate::world::{BlockPos3, World};
+use kintsugi_world::{BlockPos3, World};
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;

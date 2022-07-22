@@ -1,4 +1,4 @@
-use crate::serialization::Serialize;
+use kintsugi_core::serialization::Serialize;
 use anyhow::{bail, ensure, Context, Result};
 use rusqlite::OptionalExtension;
 use std::io::Cursor;
